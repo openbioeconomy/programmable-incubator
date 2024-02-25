@@ -46,4 +46,9 @@ Pin 16 – Cool
 Visual Studio
 Platform IO
 
+## The Team
+
+ - Richard Hopper
+ - Jenny Molloy
+
 
