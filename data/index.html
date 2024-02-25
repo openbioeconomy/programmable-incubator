@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="author" content="Richard Hopper">
+  <meta name="description" content="Incubator Remote Control">
+  <title>ESP32 remote control</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="stylesheet" href="index.css">
+  <script src="index.js"></script>
+</head>
+
+<body>
+  <div class="panel" style="color:#059e8a;">
+    <h1>Incubator Control</h1>
+    
+    <p id="demo"></p>
+
+    <form action="/action_page.php">
+      <p>Operating mode:</p>
+      <input type="radio" id="manual" name="mode" value="manual">
+      <label for="manual">Manual</label><br>
+      <input type="radio" id="schedule" name="mode" value="schedule">
+      <label for="schedule">Scheduled</Schedule>
+    </form>
+    <br>  
+    
+    <button class="button button1">Start</button>
+    <button class="button button2">Stop</button>
+
+    <table id="stepTable">
+      <tr>
+        <th id=tem_sp>Readings</th>
+      </tr>
+      <tr>
+        <td id=tem_read>%TEMPERATURE%°C</td>
+      </tr>
+    </table>
+  	
+    <table id="stepTable">
+      <tr>
+        <th id=step>Step #</th>
+        <th id=duration>Durations (s)</th>
+        <th id=temperature>Temperature (&degC)</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td><input type="number" value="10"></td>
+        <td><input type="number" value="25"></td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td><input type="number" value="10"></td>
+        <td><input type="number" value="25"></td>
+      </tr>
+    </table>
+  </div>
+
+</body>
+
+</html>
