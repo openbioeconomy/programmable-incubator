@@ -1,5 +1,7 @@
 # Programmable Incubator for Protein Expression
 
+![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
+
 ## Summary
 
 The Programmable Incubator for Protein Expression project is developing a control module that can be added to a commercially available incubator that allows programming of temperature profiles over time, currently using a WiFi interface that allows user to connect via a phone or computer without the need for internet access.
