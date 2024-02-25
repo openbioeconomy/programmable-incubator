@@ -23,3 +23,22 @@ It is therefore advantageous to be able to programme temperature profiles over t
 
 The Programmable Incubator for Protein Expression project is developing a control module that can be added to the commercially available incubator that allows programming of temperature profiles, currently using a WiFi interface that allows user to connect via a phone or computer without the need for internet access.
 
+## Technical Description
+The incubator is a Lucky Reptile Herp Nursery II – Incubator (model HN-2) with a temperature range of 5 to 60 degC. The incubator uses a Peltier device to heat or cool running at 12 V. 
+The control system is based on an ESP32-S3 board from Adafruit, interfaced to the relay control circuit of the incubator.
+The control system running on the ESP32 used a PID algorithm. Temperature monitoring is done using a SHT31 temperature sensor. 
+Remote communication with the system is via a web interface, with the ESP32 acting a webserver. 
+The system can be programmed with a constant temperature setpoint or schedule of temperature points with dwell times. 
+
+## Incubator wiring
+![image](https://github.com/openbioeconomy/programmable-incubator/assets/50485336/2d474b24-3f68-4b22-a6c5-431ea4754904)
+
+## ESP32 pins 
+Pin 17 – Heat 
+Pin 16 – Cool
+
+## Dependencies
+Visual Studio
+Platform IO
+
+
