@@ -51,4 +51,5 @@ Platform IO
  - Richard Hopper
  - Jenny Molloy
 
+This is a collaboration of [Open Bioeconomy Lab](https://openbioeconomy.org) with the [Biomaker Meetup](https://www.meetup.com/makespace/events/pbhdjtygcdbcc/) at [Cambridge Makespace](https://web.makespace.org/)
 
