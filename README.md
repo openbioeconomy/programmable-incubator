@@ -4,7 +4,7 @@
 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com) <a href="https://www.repostatus.org/#wip"><img src="https://www.repostatus.org/badges/latest/wip.svg" alt="Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public." align="left" /></a> [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT) 
 
-This is a draft repository - several parts are currently incomplete as at March 2024.
+Note [25 Feb 2024]: This is a draft repository - several parts are currently incomplete.
 
 ## Summary
 
