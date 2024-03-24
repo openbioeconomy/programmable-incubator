@@ -43,6 +43,12 @@ The system can be programmed with a constant temperature setpoint or schedule of
 Pin 17 – Heat 
 Pin 16 – Cool
 
+## Sensor pins 
+Green – SDA
+White – SCL
+Red - 3.3 V
+Black - GND
+
 ## Dependencies
 Visual Studio
 Platform IO
