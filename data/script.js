@@ -41,9 +41,17 @@ function onClose(event) {
     setTimeout(initWebSocket, 2000);
 }
 
+
+// Function that receives the message from the ESP32 with the readings
 function onMessage(event) {
-    let data = JSON.parse(event.data);
-    document.getElementById('led').className = data.status;
+    console.log(event.data);
+    var myObj = JSON.parse(event.data);
+    var keys = Object.keys(myObj);
+
+    for (var i = 0; i < keys.length; i++){
+        var key = keys[i];
+        document.getElementById(key).innerHTML = myObj[key];
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -51,32 +59,13 @@ function onMessage(event) {
 // ----------------------------------------------------------------------------
 
 function initButton() {
-    document.getElementById('load').addEventListener('click', onToggle);
+    document.getElementById('button').addEventListener('click', toggle);
 }
 
-function onToggle(event) {
-    const jsonObj = tableToJson(stepTable);  
-    const jsonStr = JSON.stringify(jsonObj);
-	document.getElementById("demo").innerHTML = jsonStr;
-    websocket.send(jsonStr);
-}
-
-function tableToJson(table) {
-    
- 	// first row needs to be headers
+function toggle() {
+    var dataArray = [1, 2, 3, 4];
     myObj = {};
-	// go through columns
- 	for (var j=1; j<table.rows[0].cells.length; j++) {
-  	var header = table.rows[0].cells[j].id;
-    
-		var dataArray = []
-		// go through rows
-   	for (var i=1; i<table.rows.length; i++) {
-    	var tableRow = table.rows[i];        
-     	dataArray.push(tableRow.cells[j].querySelector('input').value);
-		}       
-		myObj[header] = dataArray;
-	}
-  
-	return myObj;
+    myObj['testData'] = dataArray;
+    websocket.send(myObj);
 }
+

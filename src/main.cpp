@@ -17,92 +17,27 @@
 // Definition of macros
 // ----------------------------------------------------------------------------
 
-#define LED_PIN   26
-#define BTN_PIN   22
 #define HTTP_PORT 80
 
 // ----------------------------------------------------------------------------
 // Definition of global constants
 // ----------------------------------------------------------------------------
 
-// Button debouncing
-const uint8_t DEBOUNCE_DELAY = 10; // in milliseconds
 
 // WiFi credentials
-//const char *WIFI_SSID = "Makespace";
-//const char *WIFI_PASS = "getexc1tedandmaketh1ngs";
-const char *WIFI_SSID = "TALKTALK42E7AF";
-const char *WIFI_PASS = "44ER8RTH";
-
-// ----------------------------------------------------------------------------
-// Definition of the LED component
-// ----------------------------------------------------------------------------
-
-struct Led {
-    // state variables
-    uint8_t pin;
-    bool    on;
-
-    // methods
-    void update() {
-        digitalWrite(pin, on ? HIGH : LOW);
-    }
-};
-
-// ----------------------------------------------------------------------------
-// Definition of the Button component
-// ----------------------------------------------------------------------------
-
-struct Button {
-    // state variables
-    uint8_t  pin;
-    bool     lastReading;
-    uint32_t lastDebounceTime;
-    uint16_t state;
-
-    // methods determining the logical state of the button
-    bool pressed()                { return state == 1; }
-    bool released()               { return state == 0xffff; }
-    bool held(uint16_t count = 0) { return state > 1 + count && state < 0xffff; }
-
-    // method for reading the physical state of the button
-    void read() {
-        // reads the voltage on the pin connected to the button
-        bool reading = digitalRead(pin);
-
-        // if the logic level has changed since the last reading,
-        // we reset the timer which counts down the necessary time
-        // beyond which we can consider that the bouncing effect
-        // has passed.
-        if (reading != lastReading) {
-            lastDebounceTime = millis();
-        }
-
-        // from the moment we're out of the bouncing phase
-        // the actual status of the button can be determined
-        if (millis() - lastDebounceTime > DEBOUNCE_DELAY) {
-            // don't forget that the read pin is pulled-up
-            bool pressed = reading == LOW;
-            if (pressed) {
-                     if (state  < 0xfffe) state++;
-                else if (state == 0xfffe) state = 2;
-            } else if (state) {
-                state = state == 0xffff ? 0 : 0xffff;
-            }
-        }
-
-        // finally, each new reading is saved
-        lastReading = reading;
-    }
-};
+const char *WIFI_SSID = "Makespace";
+const char *WIFI_PASS = "getexc1tedandmaketh1ngs";
 
 // ----------------------------------------------------------------------------
 // Definition of global variables
 // ----------------------------------------------------------------------------
 
-Led    onboard_led = { LED_BUILTIN, false };
-Led    led         = { LED_PIN, false };
-Button button      = { BTN_PIN, HIGH, 0, 0 };
+unsigned long previousMillis = 0;  // will store last updated
+const long INTERVAL = 1000;  // interval to update
+JsonDocument readings; // Json Variable to Hold Sensor Readings
+char buffer[64]; // Buffer for ws messages
+// Allocate the JSON document
+JsonDocument jsonRx;
 
 AsyncWebServer server(HTTP_PORT);
 AsyncWebSocket ws("/ws");
@@ -114,10 +49,6 @@ AsyncWebSocket ws("/ws");
 void initSPIFFS() {
   if (!SPIFFS.begin()) {
     Serial.println("Cannot mount SPIFFS volume...");
-    while (1) {
-        onboard_led.on = millis() % 200 < 50;
-        onboard_led.update();
-    }
   }
 }
 
@@ -140,12 +71,8 @@ void initWiFi() {
 // Web server initialization
 // ----------------------------------------------------------------------------
 
-String processor(const String &var) {
-    return String(var == "STATE" && led.on ? "on" : "off");
-}
-
 void onRootRequest(AsyncWebServerRequest *request) {
-  request->send(SPIFFS, "/index.html", "text/html", false, processor);
+  request->send(SPIFFS, "/index.html", "text/html");
 }
 
 void initWebServer() {
@@ -158,23 +85,15 @@ void initWebServer() {
 // WebSocket initialization
 // ----------------------------------------------------------------------------
 
-void notifyClients() {
-    // const uint8_t size = JSON_OBJECT_SIZE(1);
-    JsonDocument json;
-    json["status"] = led.on ? "on" : "off";
-
-    char buffer[64];
-    size_t len = serializeJson(json, buffer);
-    ws.textAll(buffer, len);
-}
-
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
     AwsFrameInfo *info = (AwsFrameInfo*)arg;
     if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
 
         // const uint8_t size = JSON_OBJECT_SIZE(1);
-        JsonDocument json;
-        DeserializationError err = deserializeJson(json, data);
+        //char testData[] =
+          //  "{\"sensor\":\"gps\",\"time\":1351824120,\"data\":[48.756080,2.302038]}";
+        JsonDocument jsonDoc;
+        DeserializationError err = deserializeJson(jsonDoc, (char*)data);
         
         if (err) {
             Serial.print(F("deserializeJson() failed with code "));
@@ -182,13 +101,18 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
             return;
         }
         
-        const char *action = json["test"];
-        if (strcmp(action, "toggle") == 0) {
-            Serial.println("test");
-            //led.on = !led.on;
-            //notifyClients();
-        }
+        // Fetch values.
 
+        //const char* sensor = jsonDoc["sensor"];
+        //long time = jsonDoc["time"];
+        int val = jsonDoc["testData"][0];
+        //double longitude = jsonDoc["data"][1];
+
+        // Print values.
+        Serial.println(val);
+        //Serial.println(time);
+        //Serial.println(latitude, 6);
+        //Serial.println(longitude, 6);
     }
 }
 
@@ -220,15 +144,26 @@ void initWebSocket() {
     server.addHandler(&ws);
 }
 
+void notifyClients(String message) {
+  ws.textAll(message);
+}
+
+// ----------------------------------------------------------------------------
+// Sensor
+// ----------------------------------------------------------------------------
+String getSensorReadings(){
+    readings["temperature"] = String(random(100));
+    readings["humidity"] = String(random(100));
+    serializeJson(readings, buffer, 64);
+    return buffer;
+}
+
 // ----------------------------------------------------------------------------
 // Initialization
 // ----------------------------------------------------------------------------
 
 void setup() {
-    pinMode(onboard_led.pin, OUTPUT);
-    pinMode(led.pin,         OUTPUT);
-    pinMode(button.pin,      INPUT);
-
+    
     Serial.begin(115200); delay(500);
 
     initSPIFFS();
@@ -243,16 +178,15 @@ void setup() {
 
 void loop() {
     ws.cleanupClients();
+        
+    unsigned long currentMillis = millis();
 
-    button.read();
+    if (currentMillis - previousMillis >= INTERVAL) {
+        
+        String sensorReadings = getSensorReadings();
+        notifyClients(sensorReadings);
 
-    if (button.pressed()) {
-        led.on = !led.on;
-        notifyClients();
+        previousMillis = currentMillis;
     }
     
-    onboard_led.on = millis() % 1000 < 50;
-
-    led.update();
-    onboard_led.update();
 }
