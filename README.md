@@ -44,7 +44,7 @@ Pin 17 – Heat
 Pin 16 – Cool
 
 ## Sensor pins 
-Green – SDA
+Green – SDA <br>
 White – SCL
 Red - 3.3 V
 Black - GND
