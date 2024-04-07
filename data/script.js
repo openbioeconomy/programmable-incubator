@@ -63,9 +63,11 @@ function initButton() {
 }
 
 function toggle() {
-    var dataArray = [1, 2, 3, 4];
+    var dataArray = ["1", "2", "3", "4"];
     myObj = {};
     myObj['testData'] = dataArray;
-    websocket.send(myObj);
+    var jsonString = JSON.stringify(myObj);
+    console.log(jsonString);
+    websocket.send(jsonString);
 }
 
