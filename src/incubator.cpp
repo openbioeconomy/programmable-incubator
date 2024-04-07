@@ -153,10 +153,10 @@ void Incubator::run() {
         _windowStartTime = currentTime;//     +PID_WINDOW_SIZE_MAX;
     }
     if (_pidOutput < elapsedTime) {
-        peltierCool();
+        peltierHeat();
     }
     else {
-        peltierHeat();
+        peltierCool();
     }
 }
 
