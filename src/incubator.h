@@ -37,6 +37,7 @@ class Incubator {
         void peltierOff();
         void readSensor();
         bool initSensor();
+        void initPins();
         TwoWire* _wire;
         PID* _pid;
         SHT31 *_sht31 = NULL; ///< Pointer to I2C sensor 

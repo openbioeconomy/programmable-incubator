@@ -13,6 +13,7 @@ bool Incubator::begin(const uint32_t i2cSpeed){
     _I2CSpeed = i2cSpeed;
 
     //initWiFi();
+    initPins();
     initSensor();
     initPid();
    
@@ -20,6 +21,13 @@ bool Incubator::begin(const uint32_t i2cSpeed){
 
     return true;
 };
+
+void Incubator::initPins() {
+    pinMode(PIN_HEAT, OUTPUT);
+    pinMode(PIN_COOL, OUTPUT);
+    digitalWrite(PIN_HEAT, LOW);
+    digitalWrite(PIN_COOL, LOW);
+}
 
 bool Incubator::initSensor() {
     _sht31 = new SHT31(SHT31_ADDRESS);
