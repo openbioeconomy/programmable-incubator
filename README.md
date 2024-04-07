@@ -40,8 +40,14 @@ The system can be programmed with a constant temperature setpoint or schedule of
 ![image](https://github.com/openbioeconomy/programmable-incubator/assets/50485336/2d474b24-3f68-4b22-a6c5-431ea4754904)
 
 ## ESP32 pins 
-Pin 17 – Heat 
-Pin 16 – Cool
+Pin 17 – Heat <br>
+Pin 16 – Cool 
+
+## Sensor pins 
+Green – SDA <br>
+White – SCL <br>
+Red - 3.3 V <br>
+Black - GND
 
 ## Dependencies
 Visual Studio
