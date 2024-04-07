@@ -139,7 +139,7 @@ void Incubator::run() {
 
     readSensor();
     Serial.println(sensorTemperature);
-    
+
     Serial.println(_pidOutput);
     _pid->Compute();
     
@@ -156,7 +156,7 @@ void Incubator::run() {
 
     if (_pidOutput > 0) {
         if (_pidOutput < elapsedTime) {
-            peltierCool();
+            peltierOff();
         }
         else {
             peltierHeat();
@@ -165,7 +165,7 @@ void Incubator::run() {
 
     if (_pidOutput < 0) {
         if (abs(_pidOutput) < elapsedTime) {
-            peltierHeat();
+            peltierOff();
         }
         else {
             peltierCool();
