@@ -12,8 +12,8 @@ bool Incubator::begin(const uint32_t i2cSpeed){
     Wire.setClock(i2cSpeed);  // and set bus speed
     _I2CSpeed = i2cSpeed;
 
-    initWiFi();
-    initSensor();
+    //initWiFi();
+    //initSensor();
     initPid();
    
     _windowStartTime = millis();
@@ -105,7 +105,7 @@ void Incubator::initPid() {
     _consKp=1, _consKi=0.05, _consKd=0.25;
     _pid = new PID(&sensorTemperature, &_pidOutput, &pidSetpoint, _aggKp, _aggKi, _aggKd, DIRECT);
     //tell the PID to range between 0 and the full window size
-    _pid->SetOutputLimits(0, PID_WINDOW_SIZE_MAX);
+    _pid->SetOutputLimits(PID_WINDOW_SIZE_MIN, PID_WINDOW_SIZE_MAX);
     //turn the PID on
     _pid->SetMode(AUTOMATIC);
 }
@@ -139,6 +139,7 @@ void Incubator::run() {
 
     readSensor();
     Serial.println(sensorTemperature);
+    
     Serial.println(_pidOutput);
     _pid->Compute();
     
@@ -152,11 +153,23 @@ void Incubator::run() {
     { //time to shift the Relay Window
         _windowStartTime = currentTime;//     +PID_WINDOW_SIZE_MAX;
     }
-    if (_pidOutput < elapsedTime) {
-        peltierHeat();
+
+    if (_pidOutput > 0) {
+        if (_pidOutput < elapsedTime) {
+            peltierCool();
+        }
+        else {
+            peltierHeat();
+        }
     }
-    else {
-        peltierCool();
+
+    if (_pidOutput < 0) {
+        if (abs(_pidOutput) < elapsedTime) {
+            peltierHeat();
+        }
+        else {
+            peltierCool();
+        }
     }
 }
 
