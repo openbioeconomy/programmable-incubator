@@ -42,8 +42,8 @@ bool Incubator::initSensor() {
 
 void Incubator::initPid() {
     //Specify the links and initial tuning parameters
-    pidSetpoint = 30;
-    _aggKp=400, _aggKi=20, _aggKd=100;
+    pidSetpoint = 27;
+    _aggKp=240, _aggKi=12, _aggKd=60;
     _consKp=1, _consKi=0.05, _consKd=0.25;
     _pid = new PID(&sensorTemperature, &_pidOutput, &pidSetpoint, _aggKp, _aggKi, _aggKd, DIRECT);
     //tell the PID to range between 0 and the full window size
@@ -82,7 +82,7 @@ void Incubator::run() {
     readSensor();
     Serial.println(sensorTemperature);
 
-    Serial.println(_pidOutput);
+    //Serial.println(_pidOutput);
     _pid->Compute();
     
     /************************************************
@@ -90,7 +90,7 @@ void Incubator::run() {
     ************************************************/
     unsigned long currentTime = millis();
     unsigned long elapsedTime = currentTime - _windowStartTime;
-    Serial.println(elapsedTime);
+    //Serial.println(elapsedTime);
     if (elapsedTime > PID_WINDOW_SIZE_MAX)
     { //time to shift the Relay Window
         _windowStartTime = currentTime;//     +PID_WINDOW_SIZE_MAX;
