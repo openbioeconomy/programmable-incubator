@@ -13,7 +13,7 @@ bool Incubator::begin(const uint32_t i2cSpeed){
     _I2CSpeed = i2cSpeed;
 
     //initWiFi();
-    //initSensor();
+    initSensor();
     initPid();
    
     _windowStartTime = millis();
@@ -32,76 +32,10 @@ bool Incubator::initSensor() {
     return true;
 }
 
-void Incubator::initWiFi() {
-    WiFi.mode(WIFI_STA);
-    WiFi.begin(wifiSSID, wifiPass);
-    Serial.printf("Trying to connect [%s] ", WiFi.macAddress().c_str());
-    while (WiFi.status() != WL_CONNECTED) {
-        Serial.print(".");
-        delay(500);
-    }
-    Serial.printf(" %s\n", WiFi.localIP().toString().c_str());
-}
-
-void Incubator::initWebServer() {
-    _server = new AsyncWebServer(HTTP_PORT);
-    _server->on("/", HTTP_GET, [](AsyncWebServerRequest *request){ 
-        request->send(SPIFFS, "/index.html", "text/html");
-    });
-    _server->serveStatic("/", SPIFFS, "/");
-    _server->begin();
-}
-
-void Incubator::initWebSocket() {
-    _ws = new AsyncWebSocket("/ws");
-    _ws->onEvent([this](AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len) {
-        onEvent(server, client, type, arg, data, len);
-    });
-    _server->addHandler(_ws); 
-}
-
-void Incubator::onEvent(AsyncWebSocket       *server,
-             AsyncWebSocketClient *client,
-             AwsEventType          type,
-             void                 *arg,
-             uint8_t              *data,
-             size_t                len) {
-
-    switch (type) {
-        case WS_EVT_CONNECT:
-            Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
-            break;
-        case WS_EVT_DISCONNECT:
-            Serial.printf("WebSocket client #%u disconnected\n", client->id());
-            break;
-        case WS_EVT_DATA:
-            handleWebSocketMessage(arg, data, len);
-            break;
-        case WS_EVT_PONG:
-        case WS_EVT_ERROR:
-            break;
-    }
-}
-
-//void Incubator::onRootRequest(AsyncWebServerRequest *request) {
-  //request->send(SPIFFS, "/index.html", "text/html");
-//}
-
-void Incubator::handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
-    AwsFrameInfo *info = (AwsFrameInfo*)arg;
-    if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
-        Serial.println("test");
-    }
-}
-
-void Incubator::notifyClients(String message) {
-    _ws->textAll(message);
-}
-
 void Incubator::initPid() {
     //Specify the links and initial tuning parameters
-    pidSetpoint = 25;
-    _aggKp=4, _aggKi=0.2, _aggKd=1;
+    pidSetpoint = 30;
+    _aggKp=400, _aggKi=20, _aggKd=100;
     _consKp=1, _consKi=0.05, _consKd=0.25;
     _pid = new PID(&sensorTemperature, &_pidOutput, &pidSetpoint, _aggKp, _aggKi, _aggKd, DIRECT);
     //tell the PID to range between 0 and the full window size

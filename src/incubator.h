@@ -4,10 +4,6 @@
 #include "Arduino.h"
 #include <Wire.h>
 #include "SHT31.h"
-#include <SPIFFS.h>
-#include <WiFi.h>
-#include <ESPAsyncWebServer.h>
-#include <AsyncTCP.h>
 #include <ArduinoJson.h>
 #include <PID_v1.h>
 
@@ -26,8 +22,6 @@ class Incubator {
         void run();
         const char *wifiSSID = "Makespace";
         const char *wifiPass = "getexc1tedandmaketh1ngs";
-        //const char *wifiSSID = "TALKTALK42E7AF";
-        //const char *wifiPass = "44ER8RTH";
         double pidSetpoint;
         
     private:
@@ -37,30 +31,15 @@ class Incubator {
         double _aggKp, _aggKi, _aggKd;
         double _consKp, _consKi, _consKd;
         double _pidOutput;
-        void initWiFi();
-        void initWebServer();
-        void initWebSocket();
-        bool initSensor();
-        //void onRootRequest(AsyncWebServerRequest *request);
-        void handleWebSocketMessage(void *arg, uint8_t *data, size_t len);
-        void notifyClients(String message); 
-        void onEvent(AsyncWebSocket *server,
-                     AsyncWebSocketClient *client,
-                     AwsEventType type,
-                     void *arg,
-                     uint8_t *data,
-                     size_t len);
-        void onRootRequest(AsyncWebServerRequest *request);
         void initPid();
         void peltierHeat();
         void peltierCool();
         void peltierOff();
         void readSensor();
+        bool initSensor();
         TwoWire* _wire;
         PID* _pid;
-        SHT31 *_sht31 = NULL; ///< Pointer to I2C sensor
-        AsyncWebServer *_server = NULL;
-        AsyncWebSocket *_ws = NULL;  
+        SHT31 *_sht31 = NULL; ///< Pointer to I2C sensor 
         double sensorTemperature;
         double sensorHumidity;
         double temperatureSetpoint;

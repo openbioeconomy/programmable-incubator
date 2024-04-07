@@ -26,4 +26,5 @@ void setup() {
 
 void loop() {
     incubator.run();
+    delay(100);
 }
