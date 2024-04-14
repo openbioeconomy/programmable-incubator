@@ -16,6 +16,9 @@ Incubator incubator;
 // ----------------------------------------------------------------------------
 
 void setup() {
+    // Blink Code 14 Apirl 2024
+    pinMode(LED_BUILTIN, OUTPUT);
+    
     Serial.begin(115200);
     incubator.begin(10000);
 }
@@ -25,6 +28,12 @@ void setup() {
 // ----------------------------------------------------------------------------
 
 void loop() {
+    // Blink Code Below
+    digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+    delay(1000);              // wait for a second
+    digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
+    delay(1000);              // wait for a second
+    
     incubator.run();
     delay(100);
 }
