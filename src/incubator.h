@@ -6,6 +6,8 @@
 #include "SHT31.h"
 #include <ArduinoJson.h>
 #include <PID_v1.h>
+#include <Arduino_JSON.h>
+#include <SPIFFS.h>
 
 #define SHT31_ADDRESS   0x44
 #define HTTP_PORT 80
@@ -13,6 +15,15 @@
 #define PIN_COOL 16
 #define PID_WINDOW_SIZE_MAX 5000
 #define PID_WINDOW_SIZE_MIN -5000
+#define SCHED_SIZE 16
+
+struct Config {
+    float temperatureSetpoint;
+    bool systemRun;
+    float schedTemperature [SCHED_SIZE];
+    float schedDuration [SCHED_SIZE];
+    bool schedRun;
+};
 
 class Incubator {
     public:
@@ -23,6 +34,7 @@ class Incubator {
         const char *wifiSSID = "Makespace";
         const char *wifiPass = "getexc1tedandmaketh1ngs";
         double pidSetpoint;
+        JsonDocument systemState;
         
     private:
         unsigned long _windowStartTime;
@@ -38,6 +50,8 @@ class Incubator {
         void readSensor();
         bool initSensor();
         void initPins();
+        void readConfig(JsonDocument* jsonDoc);
+        void saveConfig();
         TwoWire* _wire;
         PID* _pid;
         SHT31 *_sht31 = NULL; ///< Pointer to I2C sensor 

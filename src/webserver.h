@@ -11,25 +11,28 @@
 
 // WiFi network credentials
 const char* WIFI_SSID = "TALKTALK42E7AF";
-const char* WIFI_PASSWORD = ;
+const char* WIFI_PASSWORD = "44ER8RTH";
 
-void serverInitWiFi();
+void webSvrInitWiFi();
 
-void serverInitWebServer();
+void webSvrInitWebServer();
 
-void serverInitWebSocket();
+void webSvrInitWebSocket();
 
-void serverOnRootRequest(AsyncWebServerRequest *request);
+void webSvrOnRootRequest(AsyncWebServerRequest *request);
 
-void serverNotifyWebsocketClients(String message);
+void webSvrNotifyWebsocketClients(String message);
 
-void serverWebsocketOnEvent(AsyncWebSocket *server,
+void webSvrWebsocketOnEvent(AsyncWebSocket *server,
                             AsyncWebSocketClient *client,
                             AwsEventType type,
                             void *arg,
                             uint8_t *data,
                             size_t len);
 
-void serverHandleWebSocketMessage(void *arg, uint8_t *data, size_t len);
+
+void webSvrOnRootRequest(AsyncWebServerRequest *request);
+
+void webSvrHandleWebSocketMessage(void *arg, uint8_t *data, size_t len);
 
 #endif /* SERVER_H_ */

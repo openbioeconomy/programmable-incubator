@@ -52,31 +52,6 @@ void Incubator::initPid() {
     _pid->SetMode(AUTOMATIC);
 }
 
-// Function definitions:
-void Incubator::peltierHeat() {
-    digitalWrite(PIN_COOL, LOW);
-    digitalWrite(PIN_HEAT, HIGH);
-    Serial.println("Peltier Heat");
-}
-
-void Incubator::peltierCool() {
-  digitalWrite(PIN_HEAT, LOW);
-  digitalWrite(PIN_COOL, HIGH);
-  Serial.println("Peltier Cool");
-}
-
-void Incubator::peltierOff() {
-    digitalWrite(PIN_HEAT, LOW);
-    digitalWrite(PIN_COOL, LOW);
-    Serial.println("Peltier Off");
-}
-
-void Incubator::readSensor() {
-    _sht31->read();
-    sensorTemperature = (double)_sht31->getTemperature();
-    sensorHumidity = (double)_sht31->getHumidity();
-}
-
 void Incubator::run() {
 
     readSensor();
@@ -114,4 +89,66 @@ void Incubator::run() {
         }
     }
 }
+
+// Function definitions:
+void Incubator::peltierHeat() {
+    digitalWrite(PIN_COOL, LOW);
+    digitalWrite(PIN_HEAT, HIGH);
+    Serial.println("Peltier Heat");
+}
+
+void Incubator::peltierCool() {
+  digitalWrite(PIN_HEAT, LOW);
+  digitalWrite(PIN_COOL, HIGH);
+  Serial.println("Peltier Cool");
+}
+
+void Incubator::peltierOff() {
+    digitalWrite(PIN_HEAT, LOW);
+    digitalWrite(PIN_COOL, LOW);
+    Serial.println("Peltier Off");
+}
+
+void Incubator::readSensor() {
+    _sht31->read();
+    sensorTemperature = (double)_sht31->getTemperature();
+    sensorHumidity = (double)_sht31->getHumidity();
+}
+
+ void Incubator::readConfig(JsonDocument* jsonDoc) {
+    Serial.print("Reading Config:");
+    File configFile = SPIFFS.open("/config.txt", "r"); // Open file for reading. 
+
+    if (!configFile) {
+        Serial.println("- failed to open config file for writing");
+        return;
+    }
+
+    deserializeJson(*jsonDoc, configFile); // Save contents of config file to json.
+    configFile.close();
+    Serial.println("Read OK");
+ }
+
+ void Incubator::saveConfig() {        
+    Serial.print("Save Config: ");
+
+    JsonDocument jsonDoc;
+    readConfig(&jsonDoc);
+
+    serializeJson(jsonDoc, Serial); // Print contents. 
+        
+    jsonDoc["test"] = "test"; // Create a json element. 
+    
+    File configFile = SPIFFS.open("/config.txt", "w"); // Open file to write. 
+    serializeJson(jsonDoc, configFile); // Save json object. 
+    serializeJson(jsonDoc, Serial); // Print contents. 
+    configFile.close(); // Close file. 
+    Serial.println(""); 
+    Serial.println(" - config.json saved - OK.");
+}
+
+
+
+
+
 
