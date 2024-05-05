@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="script.js"></script>
+</head>
+<body>
+
+<header>
+  <h1>Incubator Control</h1>
+</header>
+
+<ul>
+  <a href="control.html">Control</a>
+  <a href="sched.html">Schedule</a>
+</ul>
+
+<main>
+  
+  <section class="left">
+
+    <button class="ctrl-button" id="ctrl-on-button">On</button>
+    <button class="ctrl-button" id="ctrl-off-button">Off</button>
+    
+    <form>
+      <label for="sp">Setpoint</label>
+      <input class= "ctrl-input" id="ctrl-setpoint-input" type="number"/>
+      <input class= "ctrl-button" id = "ctrl-setpoint-button" type="button" value="Set">
+    </form>
+
+  </section>
+
+  <section class="right">
+
+    <table class="readings-table">
+      <tr>
+        <td>Temp.</td>
+        <td id="sensor-temperature">25</td>
+      </tr>
+      <tr>
+        <td>RH</td>
+        <td id="sensor-humidity">50</td>
+      </tr>
+    </table>
+
+  </section>
+
+</main>
+
+</body>
+</html>

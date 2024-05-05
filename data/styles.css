@@ -1,59 +1,175 @@
+@charset "UTF-8";
 
-html {
-  font-family: Arial, Helvetica, sans-serif;
-  text-align: center;
+/**
+ * ----------------------------------------------------------------------------
+ * Incubator Remote Control
+ * ----------------------------------------------------------------------------
+ * © 2023 Richard Hopper
+ * ----------------------------------------------------------------------------
+ */
+
+* {
+  box-sizing: border-box;
 }
-h1 {
-  font-size: 1.8rem;
-  color: white;
-}
-h2{
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #143642;
-}
-.topnav {
-  overflow: hidden;
-  background-color: #143642;
-}
+
 body {
-  margin: 0;
+  font-family: Verdana;
+  color:#aaaaaa;
 }
-.content {
-  padding: 30px;
-  max-width: 600px;
-  margin: 0 auto;
-}
-.card {
-  background-color: #F8F7F9;;
-  box-shadow: 2px 2px 12px 1px rgba(140,140,140,.5);
-  padding-top:10px;
-  padding-bottom:20px;
-}
-.button {
-  padding: 15px 50px;
-  font-size: 24px;
+
+header {
+  background-color: #e5e5e5;
+  padding: 15px;
   text-align: center;
-  outline: none;
-  color: #fff;
-  background-color: #0f8b8d;
+}
+
+h1 {
+  margin-top: 0;
+  text-align: center;
+}
+
+ul {
+  float: left;
+  width: 20%;
+  text-align: center;
+}
+
+ul a {
+  background-color: #e5e5e5;
+  padding: 8px;
+  margin-top: 7px;
+  display: block;
+  width: 100%;
+  color: black;
+}
+
+main {
+  float: left;
+  width: 80%;
+  padding: 7px 20px;
+}
+
+.left {
+  float: left;
+  width: 40%;
+  padding: 7px 20px;
+}
+
+.right {
+  float: left;
+  width: 40%;
+  padding: 15px;
+  margin-top: 8px;
+}
+
+label{
+  display:inline-block;
+  width:80px;
+  margin-right:10px;
+  text-align:left;
+}
+
+fieldset{
   border: none;
-  border-radius: 5px;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  -webkit-tap-highlight-color: rgba(0,0,0,0);
+  width: 500px;
+  margin: 10px;
+}
+
+label, input {
+    display: block;
+}
+
+table {
+  font-family: arial, sans-serif;
+}
+
+.readings-table {
+  background-color: #dddddd;
+  color: #000000;
+}
+
+.readings-table td, .readings-table th {
+  border: 1px solid #dddddd;
+  padding: 8px;
+}
+
+.readings-table td:nth-child(1) {
+  width: 70px;
+  text-align: right;
+}
+
+.readings-table td:nth-child(2) {
+  width: 70px;
+  text-align: left;
+}
+
+.ctrl-button, .sched-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  display: inline-block;
+  margin: 4px 2px;
+  width: 100px;
+}
+
+.ctrl-input {
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 4px;
+  display: inline-block;
+  margin: 4px 2px;
+  width: 100px;
+}
+
+/* Button formatting */
+#ctrl-on-button, .sched-start-button {background-color: #038312;} 
+#ctrl-off-button, .sched-stop-button {background-color: #ff0000;} 
+#ctrl-setpoint-button, .sched-save-button {background-color: #1100fb;} 
+.sched-add-button, .sched-del-button {background-color: #02352d;} 
+.sched-clear-button {background-color: #e1be30;} 
+#ctrl-setpoint-button, .sched-save-button {background-color: #1100fb;} 
+
+#sched-table {
+  border-collapse: collapse;
+  margin-top: 15px;
+  margin-bottom: 6px;
+  font-size: 16px;
+}
+
+#sched-table th {
+  border: 1px solid black;
+  padding: 8px;
+  text-align: center;
+  box-sizing: border-box;
+  font-weight: bold;
+}
+
+#sched-table td {
+  border: 1px solid black;
+  padding: 8px;
+  text-align: center;
+  width: 80px;
+}
+
+.sched-table-input {
+  width: 100%;
+  height: 100%;
+  padding: 0px 0px;
+  margin: 0px 0px;
+  box-sizing: border-box;
+}
+
+.editable-cell {
+  background-color: #f2f2f2;
+  outline: none
+}
+
+@media only screen and (max-width: 620px) {
+  /* For mobile phones: */
+  ul, main, .left, .right {
+    width: 100%;
   }
-  .button:active {
-    background-color: #0f8b8d;
-    box-shadow: 2 2px #CDCDCD;
-    transform: translateY(2px);
-  }
-  .state {
-    font-size: 1.5rem;
-    color:#8c8c8c;
-    font-weight: bold;
-  }
+}

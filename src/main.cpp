@@ -8,8 +8,11 @@
 
 #include <Arduino.h>
 #include "incubator.h"
+#include "incu_server.h"
+#include "incu_wifi.h"
+#include "incu__defs.h"
 
-Incubator incubator;
+Incubator incu;
 
 // ----------------------------------------------------------------------------
 // Initialization
@@ -17,7 +20,10 @@ Incubator incubator;
 
 void setup() {
     Serial.begin(115200);
-    incubator.begin(10000);
+    incu.begin(10000);
+    incuWifiInit();
+    incuServerInitWebserver();
+    incuServerInitWebSocket(&incu.rxData);
 }
 
 // ----------------------------------------------------------------------------
@@ -25,6 +31,6 @@ void setup() {
 // ----------------------------------------------------------------------------
 
 void loop() {
-    incubator.run();
-    delay(100);
+    incu.runCmds();
+    sleep(1);
 }

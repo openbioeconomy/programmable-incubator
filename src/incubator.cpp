@@ -1,5 +1,6 @@
 #include "incubator.h"
 
+
 Incubator::Incubator()
 {
    
@@ -23,14 +24,14 @@ bool Incubator::begin(const uint32_t i2cSpeed){
 };
 
 void Incubator::initPins() {
-    pinMode(PIN_HEAT, OUTPUT);
-    pinMode(PIN_COOL, OUTPUT);
-    digitalWrite(PIN_HEAT, LOW);
-    digitalWrite(PIN_COOL, LOW);
+    pinMode(INCU_PIN_HEAT, OUTPUT);
+    pinMode(INCU_PIN_COOL, OUTPUT);
+    digitalWrite(INCU_PIN_HEAT, LOW);
+    digitalWrite(INCU_PIN_COOL, LOW);
 }
 
 bool Incubator::initSensor() {
-    _sht31 = new SHT31(SHT31_ADDRESS);
+    _sht31 = new SHT31(INCU_SHT31_ADDRESS);
     
     if (_sht31->begin()) {
       Serial.println("Sensor err!"); // Needs fixing
@@ -42,33 +43,40 @@ bool Incubator::initSensor() {
 
 void Incubator::initPid() {
     //Specify the links and initial tuning parameters
-    pidSetpoint = 27;
-    _aggKp=240, _aggKi=12, _aggKd=60;
-    _consKp=1, _consKi=0.05, _consKd=0.25;
-    _pid = new PID(&sensorTemperature, &_pidOutput, &pidSetpoint, _aggKp, _aggKi, _aggKd, DIRECT);
-    //tell the PID to range between 0 and the full window size
-    _pid->SetOutputLimits(PID_WINDOW_SIZE_MIN, PID_WINDOW_SIZE_MAX);
+    state.temperature = 25;
+    state.pidKp = 240;
+    state.pidKd = 60,
+    state.pidKi = 12;
+
+    _pid = new PID(&state.temperature, &_pidOutput, 
+        &state.setpoint, state.pidKp, state.pidKi, state.pidKd, DIRECT);
+    //tell the PID to range between the window size
+    _pid->SetOutputLimits(INCU_PID_WINDOW_SIZE_MIN, INCU_PID_WINDOW_SIZE_MAX);
     //turn the PID on
     _pid->SetMode(AUTOMATIC);
 }
 
+/* @brief This API calls the APIs to read the sensor and generate the peltier output.
+*/
 void Incubator::run() {
-
     readSensor();
-    Serial.println(sensorTemperature);
 
-    //Serial.println(_pidOutput);
+    if(state.enable) {
+        pidOutput();
+    }
+}
+
+void Incubator::pidOutput() {
     _pid->Compute();
-    
     /************************************************
     * turn the output pin on/off based on pid output
     ************************************************/
     unsigned long currentTime = millis();
     unsigned long elapsedTime = currentTime - _windowStartTime;
-    //Serial.println(elapsedTime);
-    if (elapsedTime > PID_WINDOW_SIZE_MAX)
+    
+    if (elapsedTime > INCU_PID_WINDOW_SIZE_MAX)
     { //time to shift the Relay Window
-        _windowStartTime = currentTime;//     +PID_WINDOW_SIZE_MAX;
+        _windowStartTime = currentTime;
     }
 
     if (_pidOutput > 0) {
@@ -92,27 +100,36 @@ void Incubator::run() {
 
 // Function definitions:
 void Incubator::peltierHeat() {
-    digitalWrite(PIN_COOL, LOW);
-    digitalWrite(PIN_HEAT, HIGH);
+    digitalWrite(INCU_PIN_COOL, LOW);
+    digitalWrite(INCU_PIN_HEAT, HIGH);
     Serial.println("Peltier Heat");
 }
 
 void Incubator::peltierCool() {
-  digitalWrite(PIN_HEAT, LOW);
-  digitalWrite(PIN_COOL, HIGH);
+  digitalWrite(INCU_PIN_HEAT, LOW);
+  digitalWrite(INCU_PIN_COOL, HIGH);
   Serial.println("Peltier Cool");
 }
 
 void Incubator::peltierOff() {
-    digitalWrite(PIN_HEAT, LOW);
-    digitalWrite(PIN_COOL, LOW);
+    digitalWrite(INCU_PIN_HEAT, LOW);
+    digitalWrite(INCU_PIN_COOL, LOW);
     Serial.println("Peltier Off");
 }
 
 void Incubator::readSensor() {
     _sht31->read();
-    sensorTemperature = (double)_sht31->getTemperature();
-    sensorHumidity = (double)_sht31->getHumidity();
+    state.temperature = (double)_sht31->getTemperature();
+    state.humidity = (double)_sht31->getHumidity();
+}
+
+void Incubator::disable() {
+    peltierOff();
+    state.enable = false;
+}
+
+void Incubator::enable() {
+    state.enable = true;
 }
 
  void Incubator::readConfig(JsonDocument* jsonDoc) {
@@ -130,7 +147,7 @@ void Incubator::readSensor() {
  }
 
  void Incubator::saveConfig() {        
-    Serial.print("Save Config: ");
+    Serial.println("Save Config: ");
 
     JsonDocument jsonDoc;
     readConfig(&jsonDoc);
@@ -145,6 +162,28 @@ void Incubator::readSensor() {
     configFile.close(); // Close file. 
     Serial.println(""); 
     Serial.println(" - config.json saved - OK.");
+}
+
+void Incubator::runCmds() {
+    switch (rxData.cmd) {
+        case INCU_ENABLE:
+            Serial.println("Enable");
+            enable();
+            break;
+        case INCU_DISABLE:
+            Serial.println("Disable");
+            disable();
+            break;
+        case INCU_SET_SETPOINT:
+            state.setpoint = rxData.setpoint;
+            Serial.print("Setpoint = ");
+            Serial.println(state.setpoint);
+        default:
+            // statements
+            break;
+    }
+    
+    rxData.cmd = INCU_NULL_CMD;
 }
 
 

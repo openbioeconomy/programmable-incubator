@@ -1,6 +1,0 @@
-{
-    "temperature-setpoint": 25,
-    "sched-temperature": [],
-    "sched-duration": [],
-    "sched-enable": false
-}

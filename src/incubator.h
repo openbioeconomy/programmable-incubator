@@ -8,22 +8,7 @@
 #include <PID_v1.h>
 #include <Arduino_JSON.h>
 #include <SPIFFS.h>
-
-#define SHT31_ADDRESS   0x44
-#define HTTP_PORT 80
-#define PIN_HEAT 17 
-#define PIN_COOL 16
-#define PID_WINDOW_SIZE_MAX 5000
-#define PID_WINDOW_SIZE_MIN -5000
-#define SCHED_SIZE 16
-
-struct Config {
-    float temperatureSetpoint;
-    bool systemRun;
-    float schedTemperature [SCHED_SIZE];
-    float schedDuration [SCHED_SIZE];
-    bool schedRun;
-};
+#include <incu__defs.h>
 
 class Incubator {
     public:
@@ -31,17 +16,17 @@ class Incubator {
 
         bool begin(const uint32_t i2cSpeed);
         void run();
-        const char *wifiSSID = "Makespace";
-        const char *wifiPass = "getexc1tedandmaketh1ngs";
-        double pidSetpoint;
-        JsonDocument systemState;
-        
+        void disable();
+        void enable();
+        void runCmds();
+
+        IncuData rxData;
+        IncuState state;
+
     private:
         unsigned long _windowStartTime;
         uint8_t _address;
         uint32_t _I2CSpeed;
-        double _aggKp, _aggKi, _aggKd;
-        double _consKp, _consKi, _consKd;
         double _pidOutput;
         void initPid();
         void peltierHeat();
@@ -52,12 +37,10 @@ class Incubator {
         void initPins();
         void readConfig(JsonDocument* jsonDoc);
         void saveConfig();
+        void pidOutput();
         TwoWire* _wire;
         PID* _pid;
         SHT31 *_sht31 = NULL; ///< Pointer to I2C sensor 
-        double sensorTemperature;
-        double sensorHumidity;
-        double temperatureSetpoint;
 };
 
 #endif

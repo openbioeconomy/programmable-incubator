@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+  
+<head>
+  <link rel="stylesheet" href="styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="script.js"></script>
+</head>
+
+<body>
+
+  <header>
+    <h1>Incubator Control</h1>
+    <p id="demo"></p>
+  </header>
+
+  <ul>
+    <a href="control.html">Control</a>
+    <a href="sched.html">Schedule</a>
+  </ul>
+
+  <main>
+
+    <section class="left">
+
+      <button class="sched-button sched-start-button" onclick="startSched()">Start</button>
+      <button class="sched-button sched-stop-button" onclick="stopSched()">Stop</button> 
+      <br>
+      <button class = "sched-button sched-save-button" onclick="sendSched()">Save</button> 
+      <br>
+      <button class = "sched-button sched-add-button" onclick="addRow()">Add</button>
+      <button class = "sched-button sched-del-button" onClick="deleteRows()">Del</button> 
+      <br>
+          
+      <table id="sched-table">
+        <tr>
+          <th>Step</th>
+          <th>Period</br>(min)</th>
+          <th>Setpoint</br>(&degC)</th>
+          <th>Select</br><input class="sched-select-checkbox" 
+            type="checkbox" onclick="schedSelectAll(this)"/></th>
+        </tr>
+      </table>
+    </section>
+        <!-- Table will be dynamically generated here -->
+      </table>
+      
+    </section>
+
+    <section class="right">
+      <table class="readings-table">
+        <tr>
+          <td>Temp.</td>
+          <td>25</td>
+        </tr>
+        <tr>
+          <td>RH</td>
+          <td>50</td>
+        </tr>
+        <tr>
+          <td>State</td>
+          <td>Heat</td>
+        </tr>
+      </table>
+    </section>
+    
+  </main>
+
+</body>
+</html>
