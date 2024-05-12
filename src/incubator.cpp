@@ -13,8 +13,9 @@ bool Incubator::begin(const uint32_t i2cSpeed){
     Wire.setClock(i2cSpeed);  // and set bus speed
     _I2CSpeed = i2cSpeed;
 
-    //initWiFi();
+    incuSpiffsInit();
     initPins();
+    incuSpiffsReadConfig(&config); //Read the config from file
     initSensor();
     initPid();
    
@@ -43,40 +44,32 @@ bool Incubator::initSensor() {
 
 void Incubator::initPid() {
     //Specify the links and initial tuning parameters
-    state.temperature = 25;
-    state.pidKp = 240;
-    state.pidKd = 60,
-    state.pidKi = 12;
-
-    _pid = new PID(&state.temperature, &_pidOutput, 
-        &state.setpoint, state.pidKp, state.pidKi, state.pidKd, DIRECT);
-    //tell the PID to range between the window size
+    _pid = new PID(&config.temperature, &_pidOutput, 
+        &config.setpoint, config.pidKp, config.pidKi, config.pidKd, DIRECT);
+    //Tell the PID to range between the window size
     _pid->SetOutputLimits(INCU_PID_WINDOW_SIZE_MIN, INCU_PID_WINDOW_SIZE_MAX);
-    //turn the PID on
+    //Turn the PID on
     _pid->SetMode(AUTOMATIC);
 }
 
 /* @brief This API calls the APIs to read the sensor and generate the peltier output.
 */
 void Incubator::run() {
-    readSensor();
-
-    if(state.enable) {
+    if(config.mode == INCU_CONST_TEMP) {
         pidOutput();
     }
 }
 
 void Incubator::pidOutput() {
-    _pid->Compute();
-    /************************************************
-    * turn the output pin on/off based on pid output
-    ************************************************/
-    unsigned long currentTime = millis();
+    
+    unsigned long currentTime = millis(); 
     unsigned long elapsedTime = currentTime - _windowStartTime;
     
     if (elapsedTime > INCU_PID_WINDOW_SIZE_MAX)
-    { //time to shift the Relay Window
-        _windowStartTime = currentTime;
+    { 
+        _windowStartTime = currentTime; //Shift window
+        readSensor(); // Read sensor
+        _pid->Compute(); // Compute PID output
     }
 
     if (_pidOutput > 0) {
@@ -102,88 +95,67 @@ void Incubator::pidOutput() {
 void Incubator::peltierHeat() {
     digitalWrite(INCU_PIN_COOL, LOW);
     digitalWrite(INCU_PIN_HEAT, HIGH);
-    Serial.println("Peltier Heat");
 }
 
 void Incubator::peltierCool() {
-  digitalWrite(INCU_PIN_HEAT, LOW);
-  digitalWrite(INCU_PIN_COOL, HIGH);
-  Serial.println("Peltier Cool");
+    digitalWrite(INCU_PIN_HEAT, LOW);
+    digitalWrite(INCU_PIN_COOL, HIGH);
 }
 
 void Incubator::peltierOff() {
     digitalWrite(INCU_PIN_HEAT, LOW);
     digitalWrite(INCU_PIN_COOL, LOW);
-    Serial.println("Peltier Off");
 }
 
 void Incubator::readSensor() {
     _sht31->read();
-    state.temperature = (double)_sht31->getTemperature();
-    state.humidity = (double)_sht31->getHumidity();
+    config.temperature = (double)_sht31->getTemperature();
+    config.humidity = (double)_sht31->getHumidity();
+    config.newData = true;
+    Serial.println(config.temperature);
 }
 
 void Incubator::disable() {
     peltierOff();
-    state.enable = false;
+    config.mode  = INCU_OFF; //Set the operating mode
+    Serial.println("Disabled system");
 }
 
-void Incubator::enable() {
-    state.enable = true;
+void Incubator::enableConstTemp() {
+    config.mode  = INCU_CONST_TEMP; //Set the operating mode
+    Serial.println("Enabled constant temp");
 }
 
- void Incubator::readConfig(JsonDocument* jsonDoc) {
-    Serial.print("Reading Config:");
-    File configFile = SPIFFS.open("/config.txt", "r"); // Open file for reading. 
-
-    if (!configFile) {
-        Serial.println("- failed to open config file for writing");
-        return;
+void Incubator::setTempSetpoint(float setpointVal){
+    //Check the temperature value is within range. 
+    if (setpointVal > INCU_TEMP_MIN && setpointVal < INCU_TEMP_MAX) {
+        config.setpoint = setpointVal; //Assign to system. 
+        Serial.print("Setpoint = ");
+        Serial.println(config.setpoint);
     }
-
-    deserializeJson(*jsonDoc, configFile); // Save contents of config file to json.
-    configFile.close();
-    Serial.println("Read OK");
- }
-
- void Incubator::saveConfig() {        
-    Serial.println("Save Config: ");
-
-    JsonDocument jsonDoc;
-    readConfig(&jsonDoc);
-
-    serializeJson(jsonDoc, Serial); // Print contents. 
-        
-    jsonDoc["test"] = "test"; // Create a json element. 
-    
-    File configFile = SPIFFS.open("/config.txt", "w"); // Open file to write. 
-    serializeJson(jsonDoc, configFile); // Save json object. 
-    serializeJson(jsonDoc, Serial); // Print contents. 
-    configFile.close(); // Close file. 
-    Serial.println(""); 
-    Serial.println(" - config.json saved - OK.");
 }
 
-void Incubator::runCmds() {
-    switch (rxData.cmd) {
-        case INCU_ENABLE:
-            Serial.println("Enable");
-            enable();
+void Incubator::processCmds() {
+    switch (write.cmd) {
+        case INCU_ENABLE_CONST_TEMP:
+            enableConstTemp(); // Enable the system
+            incuSpiffsSaveConfig(&config); //Save state
             break;
         case INCU_DISABLE:
-            Serial.println("Disable");
-            disable();
+            disable(); //Disable the system
+            incuSpiffsSaveConfig(&config); //Save state
             break;
         case INCU_SET_SETPOINT:
-            state.setpoint = rxData.setpoint;
-            Serial.print("Setpoint = ");
-            Serial.println(state.setpoint);
+            setTempSetpoint(write.setpoint); //Set setpoint
+            incuSpiffsSaveConfig(&config); //Save state
+            break;
+        case INCU_SAVE_CONFIG:
+            incuSpiffsSaveConfig(&config); //Save config
         default:
             // statements
             break;
     }
-    
-    rxData.cmd = INCU_NULL_CMD;
+    write.cmd = INCU_NULL_CMD;
 }
 
 

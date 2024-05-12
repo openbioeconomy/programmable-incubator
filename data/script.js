@@ -43,14 +43,18 @@ function onClose(event) {
 }
 
 function onMessage(event) {
-  var jsonRx = JSON.parse(event.data);
+  var data = JSON.parse(event.data);
   
-  if (jsonRx.sensor.temperature) {
-    document.getElementById("control-sensor-temperature").innerText = parseInt(jsonRx.sensor.temperature);
+  if (data.state.temperature) {
+    document.getElementById("sys-state-temperature").innerText = data.state.temperature;
   }
   
-  if (jsonRx.sensor.humidity) {
-    document.getElementById("control-sensor-humidity").innerText = parseInt(jsonRx.sensor.humidity);
+  if (data.state.humidity) {
+    document.getElementById("sys-state-humidity").innerText = data.state.humidity;
+  }
+
+  if (data.state.setpoint) {
+    document.getElementById("sys-state-setpoint").innerText = data.state.setpoint;
   }
 
 }

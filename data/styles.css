@@ -83,22 +83,22 @@ table {
   font-family: arial, sans-serif;
 }
 
-.readings-table {
+.sys-state-table {
   background-color: #dddddd;
   color: #000000;
 }
 
-.readings-table td, .readings-table th {
+.sys-state-table td, .sys-state-table th {
   border: 1px solid #dddddd;
   padding: 8px;
 }
 
-.readings-table td:nth-child(1) {
+.sys-state-table td:nth-child(1) {
   width: 70px;
   text-align: right;
 }
 
-.readings-table td:nth-child(2) {
+.sys-state-table td:nth-child(2) {
   width: 70px;
   text-align: left;
 }

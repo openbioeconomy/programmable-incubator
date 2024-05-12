@@ -4,11 +4,10 @@
 #include "Arduino.h"
 #include <Wire.h>
 #include "SHT31.h"
-#include <ArduinoJson.h>
 #include <PID_v1.h>
-#include <Arduino_JSON.h>
-#include <SPIFFS.h>
 #include <incu__defs.h>
+#include <ArduinoJson.h>
+#include "incu_spiffs.h"
 
 class Incubator {
     public:
@@ -17,11 +16,12 @@ class Incubator {
         bool begin(const uint32_t i2cSpeed);
         void run();
         void disable();
-        void enable();
-        void runCmds();
+        void enableConstTemp();
+        void setTempSetpoint(float);
+        void processCmds();
 
-        IncuData rxData;
-        IncuState state;
+        IncuWrite write;
+        IncuConfig config;
 
     private:
         unsigned long _windowStartTime;
@@ -35,8 +35,6 @@ class Incubator {
         void readSensor();
         bool initSensor();
         void initPins();
-        void readConfig(JsonDocument* jsonDoc);
-        void saveConfig();
         void pidOutput();
         TwoWire* _wire;
         PID* _pid;

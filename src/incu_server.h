@@ -8,8 +8,10 @@
 #include <ArduinoJson.h>
 #include "incu__defs.h"
 
-// Pointer for WebSocket data
-static struct IncuData *incuServerRxData;
+// Pointer for WebSocket rx data from client 
+static struct IncuWrite *incuWrite;
+// Pointer for the system state 
+static struct IncuConfig *incuConfig;
 // Create AsyncWebServer object on port 80
 static AsyncWebServer server(INCU_HTTP_PORT);
 // Create WebSocket
@@ -19,11 +21,9 @@ void incuServerInitSpiffs();
 
 void incuServerInitWebserver();
 
-void incuServerInitWebSocket(IncuData*);
+void incuServerInitWebSocket(IncuWrite*, IncuConfig*);
 
 void incuServerOnRootRequest(AsyncWebServerRequest *request);
-
-void incuServerNotifiyWebSocketClients(String message);
 
 void incuServerWebSocketOnEvent(AsyncWebSocket *server,
                             AsyncWebSocketClient *client,
@@ -35,5 +35,7 @@ void incuServerWebSocketOnEvent(AsyncWebSocket *server,
 void incuServerOnRootRequest(AsyncWebServerRequest *request);
 
 void incuServerHandleWebSocketMessage(void *arg, uint8_t *data, size_t len);
+
+void incuServerUpdateWebSocketClients();
 
 #endif /* ICU_SERVER_H_ */

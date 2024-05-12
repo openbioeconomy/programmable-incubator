@@ -16,6 +16,12 @@
 /* Minimum size of the PID window */
 #define INCU_PID_WINDOW_SIZE_MIN -5000
 
+/* Maximum temperature */
+#define INCU_TEMP_MAX 90
+
+/* Minimum temperature */
+#define INCU_TEMP_MIN 10
+
 // WiFi network credentials
 //static const char *WIFI_SSID = "TALKTALK42E7AF"; 
 //static const char *WIFI_PASSWORD = "44ER8RTH"; 
@@ -31,23 +37,42 @@ enum IncuCmd {
     /*! NULL command */
     INCU_NULL_CMD,
     /*! System enable */
-    INCU_ENABLE,
+    INCU_ENABLE_CONST_TEMP,
     /*! System disable */
     INCU_DISABLE,
     /*! Set temperature setpoint */
     INCU_SET_SETPOINT,
     /*! Set PID parameters */
-    INCU_SET_PID_PARMS
+    INCU_SAVE_CONFIG
+    /*! Save config */
+};
+
+enum IncuErr {
+    /*! All OK */
+    INCU_OK,
+    /*! Spiffs file error  */
+    INCU_SPIFFS_ERR,
+    /*! Sensor error */
+    INCU_SENSOR_ERR
+};
+
+enum IncuMode
+{
+    /*! Off */
+    INCU_OFF,
+    /*! Constant temp */
+    INCU_CONST_TEMP,
+    /*! Scheduled */
+    INCU_SCED
 };
 
 /*
  * @brief Incubator data config structure
  */
-struct IncuData
+struct IncuWrite
 {
+    /*! System command */
     IncuCmd cmd;
-    /*! System enable */
-    bool enable; 
     /*! Temperature setpoint */
     double setpoint;
     /*! PID Proportional */
@@ -61,12 +86,14 @@ struct IncuData
 /*
  * @brief Incubator state structure
  */
-struct IncuState
+struct IncuConfig
 {
-    /*! System enable */
-    bool enable; 
+    /*! System mode */
+    IncuMode mode;
     /*! Temperature setpoint */
     double setpoint;
+    /*! New data flag */
+    bool newData;
     /*! Temperature reading */
     double temperature;
     /*! Humidity reading */
@@ -78,6 +105,5 @@ struct IncuState
     /* PID Derivative */
     float pidKd;
 };
-
 
 #endif /* ICU_DEFS_H_ */

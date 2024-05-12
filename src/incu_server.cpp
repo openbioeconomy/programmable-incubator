@@ -40,20 +40,37 @@ void incuServerInitWebserver() {
     server.begin();
 }
 
-void incuServerInitWebSocket(IncuData* rxData) {
-    incuServerRxData = rxData;
+void incuServerInitWebSocket(IncuWrite* write, IncuConfig* config) {
+    incuConfig = config;
+    incuWrite = write;
     ws.onEvent(incuServerWebSocketOnEvent);
-    server.addHandler(&ws); 
+    server.addHandler(&ws);
 }
 
-void incuServerNotifiyWebSocketClients(String message) {
-    ws.textAll(message);
+void incuServerUpdateWebSocketClients() {
+    if(incuConfig->newData == true){
+        JsonDocument stateJson;
+        char dataCharArray[16];
+        char jsonCharArray[256];
+        snprintf(dataCharArray, sizeof(dataCharArray),"%0.1f", incuConfig->temperature);
+        stateJson["state"]["temperature"] = dataCharArray;
+        snprintf(dataCharArray, sizeof(dataCharArray),"%0.1f", incuConfig->humidity);
+        stateJson["state"]["humidity"] = dataCharArray;
+        snprintf(dataCharArray, sizeof(dataCharArray),"%0.1f", incuConfig->setpoint);
+        stateJson["state"]["setpoint"] = dataCharArray;
+        //stateJson["state"]["enable"] = String(incuConfig->enable);
+        
+        serializeJson(stateJson, jsonCharArray);
+        Serial.println(jsonCharArray);
+        ws.textAll(jsonCharArray);
+        incuConfig->newData = false;
+    }
 }
 
 void incuServerHandleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
     AwsFrameInfo *info = (AwsFrameInfo*)arg;
     if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
-
+        Serial.println((char*)data);
         JsonDocument jsonRx;
         DeserializationError err = deserializeJson(jsonRx, data);
         if (err) {
@@ -63,16 +80,21 @@ void incuServerHandleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
         }
         
         if (jsonRx["setpoint"]) {
-            incuServerRxData->setpoint = (float)jsonRx["setpoint"];
-            incuServerRxData->cmd = INCU_SET_SETPOINT;
+            incuWrite->setpoint = (float)jsonRx["setpoint"];
+            incuWrite->cmd = INCU_SET_SETPOINT;
         }
 
         if (jsonRx["enable"]) {
-            incuServerRxData->cmd = INCU_ENABLE;
+            incuWrite->cmd = INCU_ENABLE_CONST_TEMP;
         }
 
         if (jsonRx["disable"]) {
-            incuServerRxData->cmd = INCU_DISABLE;
+            incuWrite->cmd = INCU_DISABLE;
+        }
+
+        if (jsonRx["save"]) {
+            incuWrite->cmd = INCU_SAVE_CONFIG;
+            Serial.println("test");
         }
 
     }

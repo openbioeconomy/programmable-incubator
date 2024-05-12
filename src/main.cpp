@@ -23,7 +23,7 @@ void setup() {
     incu.begin(10000);
     incuWifiInit();
     incuServerInitWebserver();
-    incuServerInitWebSocket(&incu.rxData);
+    incuServerInitWebSocket(&incu.write, &incu.config);
 }
 
 // ----------------------------------------------------------------------------
@@ -31,6 +31,8 @@ void setup() {
 // ----------------------------------------------------------------------------
 
 void loop() {
-    incu.runCmds();
-    sleep(1);
+    incu.run();
+    incu.processCmds();
+    incuServerUpdateWebSocketClients();
+    delay(10);
 }
