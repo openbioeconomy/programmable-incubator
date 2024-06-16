@@ -11,8 +11,8 @@
 
 #define SHT31_ADDRESS   0x44
 #define HTTP_PORT 80
-#define PIN_HEAT 17 
-#define PIN_COOL 16
+#define PIN_HEAT 12 // was 17 originally  
+#define PIN_COOL 5 // was 16 originally  
 #define PID_WINDOW_SIZE_MAX 5000
 #define PID_WINDOW_SIZE_MIN -5000
 #define SCHED_SIZE 16
