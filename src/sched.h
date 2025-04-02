@@ -42,7 +42,7 @@ class Sched
         esp_timer_handle_t _timer_handler = NULL;
         ActivationList _activationList[STEP_LIMIT];
         double *_setpoint = NULL;
-        IncuControl *_incuControl;
+        IncuControl *_incuControl = NULL;
 };
 
 #endif

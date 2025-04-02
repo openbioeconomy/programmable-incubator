@@ -10,7 +10,6 @@
 #include "incu_control.h"
 #include "sched.h"
 #include "command_parser.h"
-#include "test.h"
 
 IncuControl incuControl;
 CommandParser commandParser;
@@ -19,7 +18,6 @@ Sched sched;
 // ----------------------------------------------------------------------------
 // Initialization
 // ----------------------------------------------------------------------------
-uint8_t sp = 25;
 
 void setup() {
     Serial.begin(115200);
