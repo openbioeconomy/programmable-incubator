@@ -5,51 +5,55 @@ CommandParser::CommandParser()
 
 }
 
-void CommandParser::begin(Sched &sched, IncuControl &incuControl)
+void CommandParser::begin(IncuControl &incuControl)
 {
-    _sched = &sched;
     _incuControl = &incuControl;
 }
 
-void CommandParser::parse(JsonDocument &json) 
+void CommandParser::parse() 
 {
-    if(json["incu"]["enable"] == true)
+    if(jsonRx["incu"]["set"]["enable"] == true)
     {
         _incuControl->enable();
     }
 
-    if(json["incu"]["enable"] == false)
+    if(jsonRx["incu"]["set"]["enable"] == false)
     {
         _incuControl->disable();
     }
 
-    if (json["incu"]["setpoint"]) {
-        _incuControl->setSetpoint(json["setpoint"]);
+    if (jsonRx["incu"]["set"]["setpoint"]) {
+        _incuControl->setSetpoint(jsonRx["incu"]["set"]["setpoint"]);
     }
 
-    if (json["incu"]["sched"]["list"]) {
+    if (jsonRx["incu"]["set"]["sched"]["list"]) {
 
         /* Get the size of the JSON Array */
-        int arraySize = json["sched"].size();   
+        int arraySize = jsonRx["incu"]["set"]["sched"].size();   
 
         /* Clear the old schedule */
-        _sched->clear(); 
+        //_sched->clear(); 
 
         /* Append to the schedule */
         for (uint8_t i = 0; i < arraySize; i++) { 
-            uint8_t temperature = json["sched"][i]["list"]["temp"];  
-            uint32_t period = json["sched"][i]["list"]["period"];
-            _sched->append(temperature, period);
+            uint8_t temperature = jsonRx["incu"]["set"]["sched"][i]["list"]["temp"];  
+            uint32_t period = jsonRx["incu"]["set"]["sched"][i]["list"]["period"];
+            //_sched->append(temperature, period);
         }
     }
 
-    if (json["incu"]["sched"]["play"] == true) {
+    if (jsonRx["incu"]["set"]["sched"]["play"] == true) {
         /* Enable the schedule */
-        _sched->play();
+        //_sched->play();c
     }
 
-    if (json["incu"]["sched"]["play"] == false) {
+    if (jsonRx["incu"]["set"]["sched"]["play"] == false) {
         /* Disable the schedule */
-        _sched->stop();
+        //_sched->stop();
+    }
+
+    if (jsonRx["incu"]["read"] == "state") {
+        /* Read the sensor */
+        jsonTx["incu"]["state"]["temperature"] = _incuControl->temperature;
     }
 }

@@ -3,16 +3,18 @@
 
 #include "ArduinoJson.h"
 #include "incu_control.h"
-#include "sched.h"
 
 class CommandParser {
     public:
         CommandParser();
-        void begin(Sched &sched, IncuControl &incuControl);
-        void parse(JsonDocument& json);    
+        JsonDocument jsonRx;
+        JsonDocument jsonTx;
+        void begin(IncuControl &incuControl);
+        void parse();
+        
     private:
-        Sched *_sched = NULL;
         IncuControl *_incuControl = NULL;
+        HardwareSerial *_serial = NULL;
 };
 
 #endif

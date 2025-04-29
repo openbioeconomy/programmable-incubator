@@ -1,11 +1,13 @@
 #include "incu_control.h"
 
-IncuControl::IncuControl() {
+IncuControl::IncuControl(void) 
+{
 
 }
 
 bool IncuControl::begin(TwoWire &wire, uint8_t address)
 {
+    // Create the sensor object & start
     _wire = &wire;
 
     // Start the i2c. 
@@ -13,17 +15,22 @@ bool IncuControl::begin(TwoWire &wire, uint8_t address)
 
     // Create the sensor object.
     _sht31 = new SHT31(address);
+        
+    // Enable the sensor
+    if (_sht31->begin()) {
+        return false;
+    }
     
-    // Disable temperature control.
+    // Disable the temperature control
     _control_enable = false;
 
+    // Initialise pins
     initPins();
-    initSensor();
-    initPid();
 
-    _windowStartTime = millis();
+    // Initialise the PID
+    initPid();
   
-    return true;
+    return(true);
 }
 
 void IncuControl::initPins() {
@@ -33,23 +40,13 @@ void IncuControl::initPins() {
     digitalWrite(PIN_COOL, LOW);
 }
 
-bool IncuControl::initSensor() 
-{
-    if (_sht31->begin()) {
-      Serial.println("Sensor err!"); // Needs fixing
-      return false;
-    }
-
-    return true;
-}
-
 void IncuControl::initPid() {
     // Specify the links and initial tuning parameters. 
     _pid = new PID(&temperature, &_pidOutput, 
         &setpoint, PID_KP, PID_KI, PID_KD, DIRECT);
-    //Tell the PID to range between the window size
+    // Tell the PID to range between the window size
     _pid->SetOutputLimits(PID_WINDOW_MIN, PID_WINDOW_MAX);
-    //Turn the PID on
+    // Turn the PID on
     _pid->SetMode(AUTOMATIC);
 }
 
@@ -69,7 +66,7 @@ void IncuControl::pidOutput() {
     if (elapsedTime > PID_WINDOW_MAX)
     { 
         _windowStartTime = currentTime; //Shift window
-        readSensor(); // Read sensor
+        readSensor(); // Read the sensor
         _pid->Compute(); // Compute PID output
     }
 
@@ -110,34 +107,34 @@ void IncuControl::peltierOff() {
     digitalWrite(PIN_COOL, LOW);
 }
 
-// Read the sensor.
-void IncuControl::readSensor() {
-    _sht31->read();
-    temperature = (double)_sht31->getTemperature();
-    humidity = (double)_sht31->getHumidity();
-    Serial.println(temperature);
-}
-
+// Disable control.
 void IncuControl::disable() {
     peltierOff();
     _control_enable = false;
     Serial.println("Enabled system");
 }
 
-
+// Enable control.
 void IncuControl::enable() {
     _control_enable = true;
-    Serial.println("Enabled system");
+    // Set the start time
+    _windowStartTime = millis();
 }
 
+// Set the setpoint.
 void IncuControl::setSetpoint(float setpointVal){
     //Check the temperature value is within range. 
     if (setpointVal > SETPOINT_MIN && setpointVal < SETPOINT_MAX) {
         setpoint = setpointVal; //Assign to system. 
         char buffer[64];  // buffer must be big enough to hold all the message
-        sprintf(buffer, "Setpoint = %d degC", setpoint);
-        Serial.println(buffer);
     }
+}
+
+// Read the sensor.
+void IncuControl::readSensor() {
+    _sht31->read();
+    temperature = (double)_sht31->getTemperature();
+    humidity = (double)_sht31->getHumidity();
 }
 
 

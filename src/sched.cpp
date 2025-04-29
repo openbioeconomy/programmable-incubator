@@ -14,10 +14,10 @@ Sched::Sched()
   pointerToClass = this; // Assign current instance to pointer (IMPORTANT!!!)
 }
 
-void Sched::begin(IncuControl &incuControl) 
+void Sched::begin() 
 {
   // Control class
-  _incuControl = &incuControl; 
+  //_incuControl = &incuControl; 
 
   // Create timer 
   const esp_timer_create_args_t my_timer_args = {
@@ -59,7 +59,7 @@ void Sched::timerInterruptHandler()
   else if (step + 1 < step_counter) {
     step++;
     double setpoint = _activationList[step].temperature;
-    _incuControl->setSetpoint(setpoint);
+    //_incuControl->setSetpoint(setpoint);
     countdownTimer = _activationList[step].period;
   }
 }
@@ -70,7 +70,7 @@ void Sched::play()
   if (step_counter > 0) {
     step = 0;
     double setpoint = _activationList[step].temperature;
-    _incuControl->setSetpoint(setpoint);
+    //_incuControl->setSetpoint(setpoint);
   }
   
   // Start the timer 
@@ -81,7 +81,7 @@ void Sched::stop() {
   // Reset the step
   step = 0;
   double setpoint = _activationList[step].temperature;
-  _incuControl->setSetpoint(setpoint);
+  //_incuControl->setSetpoint(setpoint);
   // Stop the timer
   ESP_ERROR_CHECK(esp_timer_stop(_timer_handler));
 }

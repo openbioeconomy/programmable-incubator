@@ -10,10 +10,10 @@
 #include "incu_control.h"
 #include "sched.h"
 #include "command_parser.h"
+#include "sensor.h"
 
-IncuControl incuControl;
 CommandParser commandParser;
-Sched sched;
+IncuControl incuControl;
 
 // ----------------------------------------------------------------------------
 // Initialization
@@ -24,8 +24,7 @@ void setup() {
     Wire.begin();
     Wire.setClock(100000);
     incuControl.begin(Wire, 0x44);
-    commandParser.begin(sched, incuControl);
-    sched.begin(incuControl);
+    commandParser.begin(incuControl);
 }
 
 // ----------------------------------------------------------------------------
@@ -34,13 +33,17 @@ void setup() {
 
 void loop() 
 {
+
     if (Serial.available()) 
     {
-        // Allocate the JSON document.
-        JsonDocument doc;
         // Deserialise.
-        DeserializationError err = deserializeJson(doc, Serial);
-        // Send to parser.
-        commandParser.parse(doc);
+        DeserializationError err = deserializeJson(commandParser.jsonRx, Serial);
+        // Parse.
+        commandParser.parse();
+    }
+
+    if (!commandParser.jsonTx.isNull()) 
+    {
+        serializeJson(commandParser.jsonTx, Serial);
     }
 }
