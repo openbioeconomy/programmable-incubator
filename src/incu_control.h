@@ -5,6 +5,7 @@
 #include <PID_v1.h>
 #include "Wire.h"
 #include "SHT31.h" 
+#include "sched.h"
 
 // Peltier control pins.
 #define PIN_HEAT 17 
@@ -37,6 +38,9 @@ class IncuControl
         // Temperature reading.
         double temperature;
         double humidity;
+
+        // Scheduler.
+        Sched sched;
 
         // Functions ------------
         bool begin(TwoWire &wire, uint8_t address);

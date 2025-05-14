@@ -14,29 +14,28 @@ Sched::Sched()
   pointerToClass = this; // Assign current instance to pointer (IMPORTANT!!!)
 }
 
-void Sched::begin() 
+void Sched::begin(double &setpoint) 
 {
-  // Control class
-  //_incuControl = &incuControl; 
-
+  _setpoint = &setpoint;
+  
   // Create timer 
   const esp_timer_create_args_t my_timer_args = {
     .callback = &timerCallback,
     .name = "My Timer"};
   ESP_ERROR_CHECK(esp_timer_create(&my_timer_args, &_timer_handler));
 
-  // Reset the step counter
-  step_counter = 0;
-  step = 0;
+  // Reset the active_step counter
+  step_count = 0;
+  active_step = 0;
 }
 
 void Sched::append(uint8_t temperature, uint32_t period)
 {
   // Add step 
-  if (step_counter < STEP_LIMIT) {
-    _activationList[step_counter].temperature = temperature;
-    _activationList[step_counter].period = period;
-    step_counter++;
+  if (step_count < STEP_LIMIT) {
+    _activationList[step_count].temperature = temperature;
+    _activationList[step_count].period = period;
+    step_count++;
   }
 }
 
@@ -46,8 +45,8 @@ void Sched::clear()
     _activationList[i].temperature = 0;
     _activationList[i].period = 0; 
   }
-  step_counter = 0; // Reset the step counter
-  step = 0;
+  step_count = 0; // Reset the step counter
+  active_step = 0;
 }
 
 void Sched::timerInterruptHandler()
@@ -56,34 +55,40 @@ void Sched::timerInterruptHandler()
   {
     countdownTimer--;
   }
-  else if (step + 1 < step_counter) {
-    step++;
-    double setpoint = _activationList[step].temperature;
-    //_incuControl->setSetpoint(setpoint);
-    countdownTimer = _activationList[step].period;
+  else if (active_step + 1 < step_count) {
+    active_step++;
+    *_setpoint = _activationList[active_step].temperature;
+    countdownTimer = _activationList[active_step].period;
   }
 }
 
 void Sched::play() 
 {
   // Reset the step 
-  if (step_counter > 0) {
-    step = 0;
-    double setpoint = _activationList[step].temperature;
-    //_incuControl->setSetpoint(setpoint);
+  if (step_count > 0) {
+    active_step = 0;
+    *_setpoint = _activationList[active_step].temperature;
   }
   
   // Start the timer 
-  ESP_ERROR_CHECK(esp_timer_start_periodic(_timer_handler, 1000000));  
+  ESP_ERROR_CHECK(esp_timer_start_periodic(_timer_handler, 1000000));
+
+  // Set the state
+  enable_state = true;
 }
 
 void Sched::stop() {
-  // Reset the step
-  step = 0;
-  double setpoint = _activationList[step].temperature;
-  //_incuControl->setSetpoint(setpoint);
+  // Reset the step 
+  active_step = 0;
+
+  // Set th default setpoint
+  *_setpoint = DEFAULT_SETPOINT;
+
   // Stop the timer
   ESP_ERROR_CHECK(esp_timer_stop(_timer_handler));
+
+  // Indicate the state
+  enable_state = false;
 }
 
 

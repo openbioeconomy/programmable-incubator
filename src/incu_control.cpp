@@ -2,7 +2,7 @@
 
 IncuControl::IncuControl(void) 
 {
-
+    sched = Sched();
 }
 
 bool IncuControl::begin(TwoWire &wire, uint8_t address)
@@ -29,7 +29,9 @@ bool IncuControl::begin(TwoWire &wire, uint8_t address)
 
     // Initialise the PID
     initPid();
-  
+
+    sched.begin(setpoint);
+
     return(true);
 }
 

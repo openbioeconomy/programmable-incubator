@@ -9,6 +9,9 @@
 // Maximum schedule steps
 #define STEP_LIMIT 16
 
+// Default setpoint
+#define DEFAULT_SETPOINT 25
+
 // Structure for storing the schedule
 struct ActivationList {
     uint8_t temperature;
@@ -19,19 +22,22 @@ class Sched
 {
     public:
         // Current step
-        uint8_t step;
+        uint8_t active_step;
 
         // Schedule step counter 
-        uint8_t step_counter;
+        uint8_t step_count;
 
         // Time remaining
         uint32_t countdownTimer;
+
+        // Enable state
+        bool enable_state;
 
         // Constructor
         Sched();
 
         // Functions ------------
-        void begin();
+        void begin(double &setpoint);
         void play();  
         void stop();
         void clear();
