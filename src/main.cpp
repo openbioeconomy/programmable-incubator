@@ -24,7 +24,7 @@ void setup() {
     Wire.begin();
     Wire.setClock(100000);
     incuControl.begin(Wire, 0x44);
-    commandParser.begin(incuControl);
+    commandParser.begin(incuControl, Serial);
 }
 
 // ----------------------------------------------------------------------------
@@ -33,17 +33,5 @@ void setup() {
 
 void loop() 
 {
-
-    if (Serial.available()) 
-    {
-        // Deserialise.
-        DeserializationError err = deserializeJson(commandParser.jsonRx, Serial);
-        // Parse.
-        commandParser.parse();
-    }
-
-    if (!commandParser.jsonTx.isNull()) 
-    {
-        serializeJson(commandParser.jsonTx, Serial);
-    }
+    commandParser.run();   
 }

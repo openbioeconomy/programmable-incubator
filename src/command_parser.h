@@ -9,8 +9,11 @@ class CommandParser {
         CommandParser();
         JsonDocument jsonRx;
         JsonDocument jsonTx;
-        void begin(IncuControl &incuControl);
+        void begin(IncuControl &incuControl, HardwareSerial &serial);
+        void run();
         void parse();
+        void parseGet();
+        void parseSet();
         
     private:
         IncuControl *_incuControl = NULL;

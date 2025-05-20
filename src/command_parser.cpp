@@ -5,29 +5,54 @@ CommandParser::CommandParser()
 
 }
 
-void CommandParser::begin(IncuControl &incuControl)
+void CommandParser::begin(IncuControl &incuControl, HardwareSerial &serial)
 {
     _incuControl = &incuControl;
+    _serial = &serial;
 }
 
-void CommandParser::parse() 
+void CommandParser::run() 
 {
-    if(jsonRx["incu"]["set"]["enable"] == true)
+    if (_serial->available()) 
+    {
+        // Deserialise.
+        DeserializationError err = deserializeJson(jsonRx, *_serial);
+        if (!err)
+        {
+            if(jsonRx["set"]) 
+            {
+                parseSet();
+            }
+            if(jsonRx["get"]) 
+            {
+                parseGet();
+            }
+        } 
+    }
+}
+
+void CommandParser::parseSet() 
+{
+    if(jsonRx["set"]["enable"] == true)
     {
         _incuControl->enable();
+        _serial->println("Enable");
     }
 
-    if(jsonRx["incu"]["set"]["enable"] == false)
+    if(jsonRx["set"]["enable"] == false)
     {
         _incuControl->disable();
+        _serial->println("Disable");
     }
 
-    if (jsonRx["incu"]["set"]["setpoint"]) { 
-        _incuControl->sched.stop(); // Stop any schedule
-        _incuControl->setSetpoint(jsonRx["incu"]["set"]["setpoint"]);
+    if (jsonRx["set"]["setpoint"]) {
+        double sp = jsonRx["set"]["setpoint"];
+        _incuControl->setSetpoint(sp);
+        _serial->print("Setpoint: ");
+        _serial->println(sp);
     }
 
-    if (jsonRx["incu"]["set"]["sched"]["list"]) {
+    if (jsonRx["set"]["sched"]["list"]) {
 
         /* Get the size of the JSON Array */
         int arraySize = jsonRx["incu"]["set"]["sched"].size();   
@@ -43,19 +68,25 @@ void CommandParser::parse()
         }
     }
 
-    if (jsonRx["incu"]["set"]["sched"]["play"] == true) {
+    if (jsonRx["set"]["sched"]["play"] == true) {
         /* Play the schedule */
         _incuControl->sched.play();
     }
 
-    if (jsonRx["incu"]["set"]["sched"]["play"] == false) {
+    if (jsonRx["set"]["sched"]["play"] == false) {
         /* Disable the schedule */
         _incuControl->sched.stop();
     }
 
-    if (jsonRx["incu"]["read"] == "state") {
+}
+
+void CommandParser::parseGet() 
+{
+    if (jsonRx["get"] == "state") {
         /* Read the sensor */
-        jsonTx["incu"]["state"]["temperature"] = _incuControl->temperature;
-        jsonTx["incu"]["state"]["sched"]["enable"] = _incuControl->temperature;
+        jsonTx["state"]["temperature"] = _incuControl->temperature;
+        jsonTx["state"]["setpoint"] = _incuControl->setpoint;
+        jsonTx["state"]["temperature"] = _incuControl->temperature;
+        serializeJson(jsonTx, Serial);
     }
 }
